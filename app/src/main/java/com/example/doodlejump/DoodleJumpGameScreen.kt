@@ -15,12 +15,16 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 
@@ -41,34 +45,75 @@ fun DoodleJumpGameScreen(
 }
 @Composable
 fun InterfaceImage(){
-    val backgroundImage = painterResource(R.drawable.background_1x)
-    val scoreImage = painterResource(R.drawable.score_1x)
-    val pauseImage = painterResource(R.drawable.pause_screen)
     Box(modifier = Modifier
         .fillMaxSize()){
-        Image(
-            painter = backgroundImage,
-            contentDescription = "Game Background",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
+        
+        BackgroundDisplay()
+        PauseGame()
+        ScoreDisplay(score = 368)
+        //PlayerCharacter(playerY = -170f, modifier = Modifier.align(Alignment.BottomCenter))
+        PlayerDisplay()
+        Platforms(initialPlatforms, modifier = Modifier.fillMaxSize())
 
-        )
-        Image(
-            painter = scoreImage,
-            contentDescription = "Score Image",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-        Text(
-            text = "Score: ",
-            fontFamily = doodleFontFamily,
-            fontSize = 20.sp,
-            textAlign = TextAlign.Left,
-            modifier = Modifier
-                .padding(start = 8.dp)
-        )
+    }
+}
+
+@Composable
+fun PlayerDisplay(){
+    val playerY = remember { mutableStateOf(0f) }
+    val velocity = remember { mutableStateOf(0f) }
+    val platforms = remember { mutableStateListOf(*initialPlatforms.toTypedArray()) }
+
+    val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
+    val platformGap = 100f
+    Box(modifier = Modifier
+        .fillMaxSize()) {
+        PlayerCharacter(playerY = playerY.value, modifier = Modifier
+            .align(Alignment.TopCenter))
+    }
+    UpdatePlayerPosition(playerY,velocity, modifier = Modifier)
+    if (checkCollision(playerY.value, velocity.value, platforms)){
+        velocity.value = JUMP_FORCE
+    }
+    updatePlatforms(playerY.value, platforms,screenWidth, platformGap)
+}
+@Composable
+fun ScoreDisplay(score: Int){
+    Text(
+        text = "Score: $score",
+        fontFamily = doodleFontFamily,
+        fontSize = 20.sp,
+        textAlign = TextAlign.Left,
+        modifier = Modifier
+            .padding(start = 8.dp)
+    )
+}
+@Composable
+fun BackgroundDisplay(){
+    val backgroundImage = painterResource(R.drawable.background_1x)
+    val scoreImage = painterResource(R.drawable.score_1x)
+    Image(
+        painter = backgroundImage,
+        contentDescription = "Game Background",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxSize()
+
+    )
+    Image(
+        painter = scoreImage,
+        contentDescription = "Score Image",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxWidth()
+    )
+}
+@Composable
+fun PauseGame(){
+    val pauseImage = painterResource(R.drawable.pause_screen)
+    Box(modifier = Modifier
+        .fillMaxWidth()
+    ) {
         Button(
             onClick = {},
             //enabled = ,
@@ -88,11 +133,8 @@ fun InterfaceImage(){
 
             )
         }
-        PlayerModel(playerY = 3f, modifier = Modifier.align(Alignment.TopCenter))
-
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun ScreenPreview() {
