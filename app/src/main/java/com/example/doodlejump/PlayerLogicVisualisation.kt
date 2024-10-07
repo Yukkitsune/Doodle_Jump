@@ -13,10 +13,13 @@ import androidx.compose.ui.unit.Dp
 
 
 @Composable
-fun PlayerCharacter(playerY: Float,modifier: Modifier = Modifier){
+fun PlayerCharacter(playerX:Float,playerY: Float,modifier: Modifier = Modifier){
     val density = LocalDensity.current
     val playerYOffset: Dp = with(density){
         playerY.toDp()
+    }
+    val playerXOffset: Dp = with(density){
+        playerX.toDp()
     }
     val modelRight = painterResource(R.drawable.lik_right)
     val modelLeft = painterResource(R.drawable.lik_left)
@@ -24,7 +27,7 @@ fun PlayerCharacter(playerY: Float,modifier: Modifier = Modifier){
         painter = modelRight,
         contentDescription = "Player",
         modifier = modifier
-            .offset(y = playerYOffset)
+            .offset(x =playerXOffset, y = playerYOffset)
             .size(60.dp),
         contentScale = ContentScale.Crop
     )

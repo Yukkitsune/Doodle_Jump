@@ -1,32 +1,28 @@
 package com.example.doodlejump
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
 
 @Composable
-fun Platforms(platforms: List<Platform>, modifier: Modifier){
+fun Platforms(modifier: Modifier):MutableList<Platform>{
     val platformImage = painterResource(R.drawable.greenbar)
     val screenHeightDP = LocalConfiguration.current.screenHeightDp.dp
     val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
     val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
-    var platforms = platforms
-    platforms += generateRandomPlatforms(screenWidth,screenHeight, count = 10)
+    var platforms = initialPlatforms
+    //platforms += generateRandomPlatforms(screenWidth,screenHeight, count = 10)
     platforms.forEach{ platform ->
         Box(modifier = Modifier
-            .background(Color.Transparent)
+            //.background(Color.Black)
             .size(100.dp,20.dp)
             .offset(x = platform.x.dp, y = (screenHeightDP - platform.y.dp))){
             Image(
@@ -37,8 +33,9 @@ fun Platforms(platforms: List<Platform>, modifier: Modifier){
                 )
         }
     }
+    return platforms
 }
-fun generateRandomPlatforms(screenWidth: Float, screenHeight: Float,count: Int):List<Platform>{
+fun generateRandomPlatforms(screenWidth: Float, screenHeight: Float,count: Int):MutableList<Platform>{
 
     val platforms = mutableListOf<Platform>()
     for(i in 0 until count){
@@ -57,7 +54,8 @@ fun updatePlatforms(playerY: Float, platforms: MutableList<Platform>, screenWidt
     }
 
 }
-var initialPlatforms = listOf(
+
+var initialPlatforms = mutableListOf(
     Platform(0f,10f),
     Platform(80f,20f),
     Platform(160f,0f),
