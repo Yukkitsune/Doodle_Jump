@@ -12,57 +12,65 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
 
+
+data class Platform(
+
+    val x: Float,
+    val y: Float
+)
+
 @Composable
-fun Platforms(modifier: Modifier):MutableList<Platform>{
+fun Platforms(screenWidth: Float, screenHeight: Float, modifier: Modifier): MutableList<Platform> {
     val platformImage = painterResource(R.drawable.greenbar)
     val screenHeightDP = LocalConfiguration.current.screenHeightDp.dp
-    val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
-    val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
     var platforms = initialPlatforms
     //platforms += generateRandomPlatforms(screenWidth,screenHeight, count = 10)
-    platforms.forEach{ platform ->
-        Box(modifier = Modifier
-            //.background(Color.Black)
-            .size(100.dp,20.dp)
-            .offset(x = platform.x.dp, y = (screenHeightDP - platform.y.dp))){
+    platforms.forEach { platform ->
+        Box(
+            modifier = Modifier
+                //.background(Color.Black)
+                .size(platformWidth.dp, platformHeight.dp)
+                .offset(x = platform.x.dp, y = (screenHeightDP - platform.y.dp))
+        ) {
             Image(
                 painter = platformImage,
                 contentDescription = "Platform",
                 modifier = Modifier
-                    .size(100.dp,20.dp)
-                )
+                    .size(platformWidth.dp, platformHeight.dp)
+            )
         }
     }
     return platforms
 }
-fun generateRandomPlatforms(screenWidth: Float, screenHeight: Float,count: Int):MutableList<Platform>{
+
+fun generateRandomPlatforms(
+    screenWidth: Float,
+    screenHeight: Float,
+    count: Int
+): MutableList<Platform> {
 
     val platforms = mutableListOf<Platform>()
-    for(i in 0 until count){
-        val x = Random.nextFloat()*screenWidth
-        val y = Random.nextFloat()*screenHeight
-        platforms.add(Platform(x,y))
+    for (i in 0 until count) {
+        val x = Random.nextFloat() * screenWidth
+        val y = Random.nextFloat() * screenHeight
+        platforms.add(Platform(x, y))
     }
     return platforms
 }
-fun updatePlatforms(playerY: Float, platforms: MutableList<Platform>, screenWidth: Float, platformGap: Float){
-    if (platforms.isNotEmpty() && playerY > platforms.maxOf{it.y}){
-        val newPlatformY = platforms.maxOf{it.y} + platformGap
-        val newPlatformX = Random.nextFloat()*screenWidth
+
+fun updatePlatforms(
+    playerY: Float,
+    platforms: MutableList<Platform>,
+    screenWidth: Float,
+    screenHeight: Float,
+    platformGap: Float
+) {
+    if (platforms.isNotEmpty() && playerY < screenHeight - platforms.maxOf { it.y }) {
+        val newPlatformY = platforms.maxOf { it.y } + platformGap
+        val newPlatformX = Random.nextFloat() * screenWidth
         platforms.removeAt(0)
-        platforms.add(Platform(newPlatformX,newPlatformY))
+        platforms.add(Platform(newPlatformX, screenHeight - newPlatformY))
     }
 
 }
 
-var initialPlatforms = mutableListOf(
-    Platform(0f,10f),
-    Platform(80f,20f),
-    Platform(160f,0f),
-    Platform(240f,15f),
-    Platform(320f,20f)
-)
-data class Platform(
-    val x: Float,
-    val y: Float
-)

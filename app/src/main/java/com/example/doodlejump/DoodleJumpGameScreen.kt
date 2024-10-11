@@ -10,7 +10,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,63 +29,154 @@ import com.example.doodlejump.ui.theme.doodleFontFamily
 
 @Composable
 fun DoodleJumpGameScreen(
-
-    //state: DoodleGamwState,
-    //onEvent: (DoodleJumpGameEvent) -> Unit,
-    modifier: Modifier = Modifier)
-{
+) {
     InterfaceImage()
 }
+
 @Composable
-fun InterfaceImage(){
-    Box(modifier = Modifier
-        .fillMaxSize()){
-        
+fun InterfaceImage() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+
         BackgroundDisplay()
         PauseGame()
-        ScoreDisplay(score = 368)
-        //PlayerCharacter(playerY = -170f, modifier = Modifier.align(Alignment.BottomCenter))
+
         PlayerDisplay()
         //Platforms(initialPlatforms, modifier = Modifier.fillMaxSize())
-        Platforms(modifier = Modifier.fillMaxSize())
+        //Platforms(modifier = Modifier.fillMaxSize())
 
     }
 }
 
 @Composable
-fun PlayerDisplay(){
+fun PlayerDisplay() {
     val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
     val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
     val platforms = initialPlatforms
     //var platforms = generateRandomPlatforms(screenWidth,screenHeight,10)
     val playerX = playerSetupX(platforms)
     val playerY = playerSetupY(platforms)
-    val velocity = playerVelocity()
-
+    val velocityX = playerVelocityX()
+    val velocityY = playerVelocityY()
     val platformGap = 100f
-    Box(modifier = Modifier
-        .fillMaxSize()) {
-        PlayerCharacter(playerX.value, playerY.value, modifier = Modifier)
-            //.align(Alignment.BottomCenter))
+    val maxY =
+        remember { mutableStateOf((screenHeight - (bottomPlatformY + platformHeight) - playerY.value)) }
+    val score = remember { mutableStateOf(0) }
+    Platforms(screenWidth = screenWidth, screenHeight = screenHeight, Modifier.fillMaxSize())
+    testIndications(
+        playerX = playerX,
+        playerY = playerY,
+        velocityX = velocityX,
+        velocityY = velocityY,
+        platforms = platforms,
+        screenWidth = screenWidth,
+        screenHeight = screenHeight
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        PlayerCharacter(playerX = playerX.value, playerY = playerY.value, modifier = Modifier)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            MoveRight(playerX)
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        ) {
+            MoveLeft(playerX)
+        }
     }
-    /*UpdatePlayerPosition(playerX,playerY,velocity, modifier = Modifier)*/
-    UpdatePlayerPosition(playerY,velocity,Modifier)
-    if (checkCollision(playerX.value,playerY.value, velocity.value, platforms)){
-        velocity.value = JUMP_FORCE
-        println("JUMP")
-
-    }
+    UpdatePlayerPosition(
+        playerX = playerX,
+        playerY = playerY,
+        velocityX = velocityX,
+        velocityY = velocityY,
+        platforms = platforms,
+        screenWidth = screenWidth,
+        screenHeight = screenHeight,
+        Modifier
+    )
+    UpdateMaxY(playerY = playerY.value, maxY = maxY)
+    score.value = CalculateScore(playerY.value, maxY, screenHeight)
+    ScoreDisplay(score = score)
     //updatePlatforms(playerY.value, platforms,screenWidth, platformGap)
+
+}
+
+@Composable
+fun testIndications(
+    playerX: MutableState<Float>,
+    playerY: MutableState<Float>,
+    velocityX: MutableState<Float>,
+    velocityY: MutableState<Float>,
+    platforms: MutableList<Platform>,
+    screenWidth: Float,
+    screenHeight: Float
+) {
     Text(
-        text = "playerX = ${playerX.value}\n playerY = ${playerY.value}\n velocity = ${velocity.value}\n" +
-                "collision = ${checkCollision(playerX.value,playerY.value, velocity.value, platforms)}\n" +
-                "platforms = $platforms"
+        text = "playerX = ${playerX.value}\n playerY = ${playerY.value}\n velocityX = ${velocityX.value}\n velocityY = ${velocityY.value}\n"
+        //"collision = ${checkCollisionJump(playerX = playerX.value, playerY =  playerY.value, velocityY =  velocityY.value,platforms = platforms, screenHeight = screenHeight)}\n" +
+        //"playerYScreenHeight = ${playerY.value - screenHeight}\n"
+        /*"platforms = $platforms\n" +
+        "platform[0] = ${platforms[0].y + screenHeight}\n" +
+        "platform[1] = ${platforms[1].y + screenHeight}\n" +
+        "platform[2] = ${platforms[2].y + screenHeight}\n" +
+        "platform[3] = ${platforms[3].y + screenHeight}\n"*/,
+        modifier = Modifier.padding(top = 40.dp)
     )
 }
+
 @Composable
-fun ScoreDisplay(score: Int){
+fun MoveRight(playerX: MutableState<Float>) {
+    Button(
+        onClick = {
+            playerX.value += 20f // Перемещаем игрока вправо на 20 единиц
+        },
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        Text("Move Right")
+    }
+}
+
+@Composable
+fun MoveLeft(playerX: MutableState<Float>) {
+    Button(
+        onClick = {
+            playerX.value -= 20f // Перемещаем игрока вправо на 20 единиц
+        },
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        Text("Move Left")
+    }
+}
+
+@Composable
+fun UpdateMaxY(playerY: Float, maxY: MutableState<Float>) {
+    if (playerY > -maxY.value) {
+        maxY.value = playerY
+    }
+}
+
+@Composable
+fun CalculateScore(playerY: Float, maxY: MutableState<Float>, screenHeight: Float): Int {
+    // Пример расчета очков: для каждой единицы поднятия по Y даем 1 очко
+    return (maxY.value.toInt())
+}
+
+@Composable
+fun ScoreDisplay(score: MutableState<Int>) {
     Text(
-        text = "Score: $score",
+        text = "Score: ${score.value}",
         fontFamily = doodleFontFamily,
         fontSize = 20.sp,
         textAlign = TextAlign.Left,
@@ -92,8 +184,9 @@ fun ScoreDisplay(score: Int){
             .padding(start = 8.dp)
     )
 }
+
 @Composable
-fun BackgroundDisplay(){
+fun BackgroundDisplay() {
     val backgroundImage = painterResource(R.drawable.background_1x)
     val scoreImage = painterResource(R.drawable.score_1x)
     Image(
@@ -112,11 +205,13 @@ fun BackgroundDisplay(){
             .fillMaxWidth()
     )
 }
+
 @Composable
-fun PauseGame(){
+fun PauseGame() {
     val pauseImage = painterResource(R.drawable.pause_screen)
-    Box(modifier = Modifier
-        .fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
         Button(
             onClick = {},
@@ -139,6 +234,7 @@ fun PauseGame(){
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun ScreenPreview() {
