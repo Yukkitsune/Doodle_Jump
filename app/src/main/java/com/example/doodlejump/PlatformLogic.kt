@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -16,61 +19,82 @@ import kotlin.random.Random
 data class Platform(
 
     val x: Float,
-    val y: Float
+    var y: Float
 )
 
 @Composable
-fun Platforms(screenWidth: Float, screenHeight: Float, modifier: Modifier): MutableList<Platform> {
+fun Platforms(platforms: MutableList<Platform>, screenWidth: Float, screenHeight: Float, modifier: Modifier) {
     val platformImage = painterResource(R.drawable.greenbar)
     val screenHeightDP = LocalConfiguration.current.screenHeightDp.dp
-    var platforms = initialPlatforms
-    //platforms += generateRandomPlatforms(screenWidth,screenHeight, count = 10)
+
     platforms.forEach { platform ->
         Box(
             modifier = Modifier
-                //.background(Color.Black)
                 .size(platformWidth.dp, platformHeight.dp)
                 .offset(x = platform.x.dp, y = (screenHeightDP - platform.y.dp))
         ) {
             Image(
                 painter = platformImage,
                 contentDescription = "Platform",
-                modifier = Modifier
-                    .size(platformWidth.dp, platformHeight.dp)
+                modifier = Modifier.size(platformWidth.dp, platformHeight.dp)
             )
         }
     }
-    return platforms
 }
 
+/*
 fun generateRandomPlatforms(
     screenWidth: Float,
     screenHeight: Float,
     count: Int
 ): MutableList<Platform> {
-
     val platforms = mutableListOf<Platform>()
+
+    // Начальная позиция по Y (внизу экрана)
+    var currentY = screenHeight - 100f
+    val minPlatformGap = 150f
+    val maxPlatformGap = 250f // Задаем случайный промежуток между платформами
+
     for (i in 0 until count) {
-        val x = Random.nextFloat() * screenWidth
-        val y = Random.nextFloat() * screenHeight
-        platforms.add(Platform(x, y))
+        // Генерация случайной позиции X в пределах ширины экрана
+        val x = Random.nextFloat() * (screenWidth - platformWidth)
+        platforms.add(Platform(x, currentY))
+
+        // Случайный промежуток между платформами
+        val platformGap = Random.nextFloat() * (maxPlatformGap - minPlatformGap) + minPlatformGap
+        currentY -= platformGap // Поднимаем следующую платформу выше
     }
+
     return platforms
 }
+*/
 
 fun updatePlatforms(
     playerY: Float,
     platforms: MutableList<Platform>,
     screenWidth: Float,
-    screenHeight: Float,
-    platformGap: Float
+    screenHeight: Float
 ) {
-    if (platforms.isNotEmpty() && playerY < screenHeight - platforms.maxOf { it.y }) {
-        val newPlatformY = platforms.maxOf { it.y } + platformGap
-        val newPlatformX = Random.nextFloat() * screenWidth
-        platforms.removeAt(0)
-        platforms.add(Platform(newPlatformX, screenHeight - newPlatformY))
-    }
+    val maxPlatformsOnScreen = 20
 
+    // Удаляем платформы, которые вышли за нижнюю границу экрана
+
+    platforms.removeIf { it.y < -50f }
+    // Если платформ на экране меньше нужного числа, добавляем новые
+    if (platforms.maxOf { it.y } < screenHeight){
+    while (platforms.size < maxPlatformsOnScreen) {
+
+        val highestPlatformY = platforms.maxOf { it.y }
+
+        // Генерируем новую платформу выше самой верхней
+        val minPlatformGap = 30f
+        val maxPlatformGap = 150f
+        val platformGap = Random.nextFloat() * (maxPlatformGap - minPlatformGap) + minPlatformGap
+        val newPlatformY = highestPlatformY + platformGap
+        val newPlatformX = Random.nextFloat() * (screenWidth - platformWidth)
+
+        // Добавляем новую платформу
+        platforms.add(Platform(newPlatformX, newPlatformY))
+        println("New platform added ${Platform(newPlatformX,newPlatformY)}")
+    }}
 }
-

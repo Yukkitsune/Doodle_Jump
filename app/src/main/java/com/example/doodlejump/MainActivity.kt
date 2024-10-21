@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             DoodleJumpTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    StartGame(
+                    DoodleJumpGameScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -35,10 +35,3 @@ fun StartGame(modifier: Modifier = Modifier) {
     DoodleJumpGameScreen()
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    DoodleJumpTheme {
-        StartGame()
-    }
-}

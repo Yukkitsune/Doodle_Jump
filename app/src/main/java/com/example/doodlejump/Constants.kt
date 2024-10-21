@@ -4,11 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 
+const val GRAVITY = 0.8f // Гравитация
+const val JUMP_FORCE = -20f // Сила прыжка
 var playerHeight = 60f
 var playerWidth = 60f
 var platformHeight = 20f
 var platformWidth = 100f
-
+var platformShift = 0f
 var initialPlatforms = mutableListOf(
     Platform(0f, 10f),
     Platform(80f, 20f),

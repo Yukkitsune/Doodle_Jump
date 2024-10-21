@@ -1,14 +1,19 @@
 package com.example.doodlejump
 
+import android.app.GameState
+
 data class DoodleJumpGameState(
     val direction: Direction = Direction.RIGHT,
+    val isGameOver: Boolean = false,
+    var gameState: GameStatus = GameStatus.IDLE
 
     )
 
-enum class GameState{
+enum class GameStatus{
     IDLE,
     STARTED,
-    PAUSED
+    PAUSED,
+    GAMEOVER
 }
 enum class Direction{
     LEFT,
