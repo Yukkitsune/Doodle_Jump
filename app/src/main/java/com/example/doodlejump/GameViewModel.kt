@@ -7,7 +7,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 
@@ -16,8 +16,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     private val sensorManager: SensorManager =
         application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-    private val _playerXPosition = mutableStateOf(0f)
-
+    private val _playerXPosition = mutableFloatStateOf(initialPlatforms.minByOrNull { it.y }?.x ?: 0f)
+    fun initialPlayerXPosition(): Float {
+        return initialPlatforms.minByOrNull { it.y }?.x ?: 0f
+    }
+    fun calculatePlayerStartY(screenHeight: Float, platforms: MutableList<Platform>): Float {
+        val bottomPlatformY = initialPlatforms.minByOrNull { it.y }?.y ?: 0f
+        return screenHeight - (bottomPlatformY + 60f)
+    }
     val playerXPosition: MutableState<Float> = _playerXPosition
     val playerDirection = mutableStateOf(Direction.RIGHT)
 

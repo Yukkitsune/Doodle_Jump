@@ -77,6 +77,13 @@ fun playerSetupY(platforms: MutableList<Platform>): MutableState<Float> {
     val playerY = remember { mutableStateOf(screenHeight - (bottomPlatformY + 60f)) }
     return playerY
 }
+/*
+fun playerSetupX(platforms: MutableList<Platform>): MutableState<Float> {
+    val bottomPlatformX = initialPlatforms.minByOrNull { it.y }?.x ?: 0f
+    val playerX = remember { mutableStateOf(bottomPlatformX) }
+    return playerX
+}
+*/
 
 @Composable
 fun playerVelocityY(): MutableState<Float> {

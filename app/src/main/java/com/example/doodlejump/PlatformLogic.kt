@@ -75,26 +75,28 @@ fun updatePlatforms(
     screenWidth: Float,
     screenHeight: Float
 ) {
+    if (platforms.isEmpty()) return
     val maxPlatformsOnScreen = 20
 
     // Удаляем платформы, которые вышли за нижнюю границу экрана
 
     platforms.removeIf { it.y < -50f }
     // Если платформ на экране меньше нужного числа, добавляем новые
-    if (platforms.maxOf { it.y } < screenHeight){
-    while (platforms.size < maxPlatformsOnScreen) {
+    if (platforms.isNotEmpty() && platforms.maxOf { it.y } < screenHeight){
+        while (platforms.size < maxPlatformsOnScreen) {
 
-        val highestPlatformY = platforms.maxOf { it.y }
+            val highestPlatformY = platforms.maxOf { it.y }
 
-        // Генерируем новую платформу выше самой верхней
-        val minPlatformGap = 30f
-        val maxPlatformGap = 150f
-        val platformGap = Random.nextFloat() * (maxPlatformGap - minPlatformGap) + minPlatformGap
-        val newPlatformY = highestPlatformY + platformGap
-        val newPlatformX = Random.nextFloat() * (screenWidth - platformWidth)
+            // Генерируем новую платформу выше самой верхней
+            val minPlatformGap = 30f
+            val maxPlatformGap = 150f
+            val platformGap = Random.nextFloat() * (maxPlatformGap - minPlatformGap) + minPlatformGap
+            val newPlatformY = highestPlatformY + platformGap
+            val newPlatformX = Random.nextFloat() * (screenWidth - platformWidth)
 
-        // Добавляем новую платформу
-        platforms.add(Platform(newPlatformX, newPlatformY))
-        println("New platform added ${Platform(newPlatformX,newPlatformY)}")
-    }}
+            // Добавляем новую платформу
+            platforms.add(Platform(newPlatformX, newPlatformY))
+            /*println("New platform added ${Platform(newPlatformX,newPlatformY)}")*/
+        }
+    }
 }

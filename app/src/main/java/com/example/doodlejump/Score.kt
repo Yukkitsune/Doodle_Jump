@@ -3,6 +3,7 @@ package com.example.doodlejump
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -14,9 +15,8 @@ import androidx.compose.ui.unit.sp
 import com.example.doodlejump.ui.theme.doodleFontFamily
 
 @Composable
-fun ScoreDisplay(platformShift: Float) {
-    val score = remember { mutableIntStateOf(0) }
-    calculateScore(platformShift, score)
+fun ScoreDisplay(score: MutableIntState, platformShift: Float) {
+    calculateScore(platformShift = platformShift, score = score)
     Text(
         text = "Score: ${score.intValue}",
         fontFamily = doodleFontFamily,

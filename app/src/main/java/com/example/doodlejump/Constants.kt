@@ -1,8 +1,5 @@
 package com.example.doodlejump
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
 
 const val GRAVITY = 0.8f // Гравитация
 const val JUMP_FORCE = -20f // Сила прыжка

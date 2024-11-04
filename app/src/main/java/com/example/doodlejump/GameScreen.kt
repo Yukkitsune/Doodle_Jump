@@ -10,8 +10,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,46 +22,49 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.doodlejump.ui.theme.DoodleJumpTheme
-import com.example.doodlejump.ui.theme.doodleFontFamily
-import kotlin.math.abs
 
 @Composable
 fun DoodleJumpGameScreen(
     currentGame:MutableState<DoodleJumpGameState> = remember { mutableStateOf(DoodleJumpGameState()) },
     modifier: Modifier = Modifier
 ) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
+    val score = remember { mutableIntStateOf(0) }
+    val bestScore = remember { mutableIntStateOf(0) }
+    val platforms = remember { initialPlatforms.toMutableList() }
     when (currentGame.value.gameState) {
         GameStatus.STARTED -> {
-            StartGameScreen(currentGame)
+            StartGameScreen(currentGame = currentGame, score = score, platforms = platforms)
         }
         GameStatus.IDLE -> {
-            MenuGameScreen(currentGame)
+            MenuGameScreen(currentGame = currentGame, score = score, platforms = platforms)
         }
         GameStatus.PAUSED -> {
-            PauseScreen(currentGame)
+            PauseScreen(currentGame = currentGame)
         }
         GameStatus.GAMEOVER -> {
-            GameOverScreen(currentGame)
+            GameOverScreen(currentGame = currentGame, score = score, bestScore = bestScore)
         }
     }
 
 }
 
 @Composable
-fun StartGameScreen(currentGame: MutableState<DoodleJumpGameState>) {
+fun StartGameScreen(
+    currentGame: MutableState<DoodleJumpGameState>,
+    score: MutableIntState,
+    platforms: MutableList<Platform>
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         BackgroundDisplay()
         PauseDisplay(currentGame)
-        UpdateGame(currentGame = currentGame)
+        UpdateGame(score = score, currentGame = currentGame, platforms = platforms)
 
     }
 }
@@ -80,32 +83,82 @@ fun PauseScreen(currentGame: MutableState<DoodleJumpGameState>) {
     }
 }
 @Composable
-fun MenuGameScreen(currentGame: MutableState<DoodleJumpGameState>){
+fun MenuGameScreen(
+    currentGame: MutableState<DoodleJumpGameState>,
+    score: MutableIntState,
+    platforms: MutableList<Platform>
+){
+    val playerX = remember { mutableStateOf(0f) }
+    val playerY = remember { mutableStateOf(0f) }
+    val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
+    resetGame(
+        viewModel = viewModel(),
+        currentGame = currentGame,
+        score = score,
+        platforms = platforms,
+        playerX = playerX,
+        playerY = playerY,
+        screenHeight = screenHeight
+    )
     Box(
         modifier = Modifier
             .fillMaxSize()
     ){
         Button(
             onClick = {
-                currentGame.value = currentGame.value.copy(gameState = GameStatus.STARTED) // Перемещаем игрока вправо на 20 единиц
+                score.intValue = 0
+                currentGame.value = currentGame.value.copy(gameState = GameStatus.STARTED)
+
             },
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.Center)
         ) {
-            Text("START GAME, gameState = ${currentGame.value.gameState}")
+            Text("START GAME")
         }
     }
 }
+fun resetGame(
+    viewModel: GameViewModel,
+    currentGame: MutableState<DoodleJumpGameState>,
+    score: MutableIntState,
+    platforms: MutableList<Platform>,
+    playerX: MutableState<Float>, // Позиция игрока по X
+    playerY: MutableState<Float>, // Позиция игрока по Y
+    screenHeight: Float
+) {
+    // Сброс состояния игры
+    currentGame.value =
+        currentGame.value.copy(gameState = GameStatus.IDLE)  // Возвращаем игру в состояние "ожидания"
+    platformShift = 0f
+    platforms.clear()
+    for (i in 0..initialPlatforms.size-1){
+        platforms += initialPlatforms[i]
+    }
+    for (i in 0..initialPlatforms.size-1){
+        println(platforms[i])
+    }
+    // Сброс счета
+    score.intValue = 0
+    playerX.value = viewModel.initialPlayerXPosition()//viewModel.playerXPosition  // Начальное значение для позиции X игрока (зависит от начального положения в вашей игре)
+    playerY.value = viewModel.calculatePlayerStartY(screenHeight = screenHeight, platforms = platforms )  // Начальное значение для позиции Y игрока
+    println("GAME RESET")
+}
 @Composable
-fun GameOverScreen(currentGame: MutableState<DoodleJumpGameState>) {
+fun GameOverScreen(currentGame: MutableState<DoodleJumpGameState>, score:MutableIntState, bestScore:MutableIntState) {
+    if (score.intValue > bestScore.intValue){
+        bestScore.intValue = score.intValue
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         Text(
-            text = "Game Over! Your score: ${ScoreDisplay(platformShift = platformShift)}",
-            modifier = Modifier.align(Alignment.Center)
+            text = "Game Over!\nYour score: ${score.intValue}\nBest score: ${bestScore.intValue}",
+            fontSize = 24.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(Alignment.Center).padding(16.dp)
         )
         Button(
             onClick = {
+                score.intValue = 0
                 currentGame.value = currentGame.value.copy(gameState = GameStatus.IDLE) // Возврат в меню
             },
             modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
@@ -115,12 +168,16 @@ fun GameOverScreen(currentGame: MutableState<DoodleJumpGameState>) {
     }
 }
 @Composable
-fun UpdateGame( viewModel: GameViewModel = viewModel(), currentGame: MutableState<DoodleJumpGameState>) {
+fun UpdateGame(
+    viewModel: GameViewModel = viewModel(),
+    currentGame: MutableState<DoodleJumpGameState>,
+    score: MutableIntState,
+    platforms: MutableList<Platform>) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
     val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
-    val platforms = remember { mutableStateOf(initialPlatforms) }
+    //var platforms = remember { mutableStateOf(initialPlatforms) }
     val playerX = viewModel.playerXPosition
-    val playerY = playerSetupY(platforms.value)
+    val playerY = playerSetupY(platforms)
     val velocityX = playerVelocityX()
     val velocityY = playerVelocityY()
 
@@ -130,22 +187,24 @@ fun UpdateGame( viewModel: GameViewModel = viewModel(), currentGame: MutableStat
         playerY = playerY,
         velocityX = velocityX,
         velocityY = velocityY,
-        platforms = platforms.value,
+        platforms = platforms,
         screenWidth = screenWidth,
         screenHeight = screenHeight,
         onPlatformShift = { shift -> platformShift += shift },
         currentGame = currentGame,
         modifier = Modifier
     )
-    ScoreDisplay(platformShift = platformShift)
+    ScoreDisplay(score = score,platformShift = platformShift)
     updatePlatforms(
         playerY = playerY.value,
-        platforms = platforms.value,
+        platforms = platforms,
         screenWidth = screenWidth,
         screenHeight = screenHeight
     )
     Platforms(
-        platforms = platforms.value, screenWidth = screenWidth, screenHeight = screenHeight,
+        platforms = platforms,
+        screenWidth = screenWidth,
+        screenHeight = screenHeight,
         modifier = Modifier.fillMaxSize()
     )
 
