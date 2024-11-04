@@ -14,19 +14,19 @@ import kotlin.math.abs
 fun testIndications(
     playerX: Float,
     playerY: MutableState<Float>,
-    velocityX: MutableState<Float>,
-    velocityY: MutableState<Float>,
+    velocityX: Int,
+    velocityY: Int,
     platforms: MutableList<Platform>,
     screenWidth: Float,
     screenHeight: Float
 ) {
     Text(
-        text = "playerX = ${playerX}\n playerY = ${playerY.value}\n velocityX = ${velocityX.value}\n velocityY = ${velocityY.value}\n" +
+        text = "playerX = ${playerX}\n playerY = ${playerY.value}\n velocityX = ${velocityX}\n velocityY = ${velocityY}\n" +
                 "collision = ${
                     checkPlatformCollision(
                         playerX = playerX,
                         playerY = playerY.value,
-                        velocityY = velocityY.value,
+                        velocityY = 0f,
                         platforms = platforms,
                         screenHeight = screenHeight
                     )

@@ -26,9 +26,13 @@ fun UpdatePlayerPosition(
     modifier: Modifier
 ) {
     LaunchedEffect(Unit) {
+
         while (true) {
             delay(16L) // Частота обновления 60 FPS
-
+            if (currentGame.value.gameState != GameStatus.STARTED){
+                delay(100L)
+                continue
+            }
             // Обновление координат по X и Y с учетом текущей скорости
             playerX.value += velocityX.value
 

@@ -8,7 +8,7 @@ var playerWidth = 60f
 var platformHeight = 20f
 var platformWidth = 100f
 var platformShift = 0f
-var initialPlatforms = mutableListOf(
+val initialPlatforms = listOf(
     Platform(0f, 10f),
     Platform(80f, 20f),
     Platform(160f, 0f),
