@@ -16,39 +16,47 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     private val sensorManager: SensorManager =
         application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-    private val _playerXPosition = mutableFloatStateOf(initialPlatforms.minByOrNull { it.y }?.x ?: 0f)
+    private val _playerXPosition =
+        mutableFloatStateOf(initialPlatforms.minByOrNull { it.y }?.x ?: 0f)
+
     fun initialPlayerXPosition(): Float {
         return initialPlatforms.minByOrNull { it.y }?.x ?: 0f
     }
+
     fun calculatePlayerStartY(screenHeight: Float, platforms: MutableList<Platform>): Float {
         val bottomPlatformY = initialPlatforms.minByOrNull { it.y }?.y ?: 0f
         return screenHeight - (bottomPlatformY + 60f)
     }
+
     val playerXPosition: MutableState<Float> = _playerXPosition
     val playerDirection = mutableStateOf(Direction.RIGHT)
 
-    init{
-        sensorManager.registerListener(this,accelerometer,SensorManager.SENSOR_DELAY_GAME)
+    init {
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME)
     }
-    private fun updatePlayerPosition(tilt: Float){
+
+    private fun updatePlayerPosition(tilt: Float) {
         // Здесь можно изменить скорость движения персонажа в зависимости от наклона
         val sensitivity = -3f // Настраиваемая чувствительность
         _playerXPosition.value += tilt * sensitivity
     }
-    fun moveRight(){
+
+    fun moveRight() {
         _playerXPosition.value += 20f
     }
-    fun moveLeft(){
+
+    fun moveLeft() {
         _playerXPosition.value -= 20f
     }
+
     override fun onSensorChanged(event: SensorEvent?) {
         // Обрабатываем данные акселерометра
         val xAxisValue = event?.values?.get(0) // Получаем наклон по оси X
         if (xAxisValue != null) {
             updatePlayerPosition(xAxisValue)
-            if (xAxisValue < -1){
+            if (xAxisValue < -1) {
                 playerDirection.value = Direction.RIGHT
-            }else if (xAxisValue > 1){
+            } else if (xAxisValue > 1) {
                 playerDirection.value = Direction.LEFT
             }
         }
