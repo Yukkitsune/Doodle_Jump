@@ -3,6 +3,7 @@ package com.example.doodlejump
 
 const val GRAVITY = 0.8f // Гравитация
 const val JUMP_FORCE = -20f // Сила прыжка
+const val SPRING_JUMP_FORCE = -30f
 var playerHeight = 60f
 var playerWidth = 60f
 var platformHeight = 20f
@@ -19,5 +20,3 @@ val initialPlatforms = listOf(
     Platform(105f, 380f),
     Platform(0f, 340f)
 )
-val bottomPlatformY = initialPlatforms.minByOrNull { it.y }?.y ?: 0f
-val bottomPlatformX = initialPlatforms.minByOrNull { it.y }?.x ?: 0f

@@ -7,15 +7,15 @@ data class DoodleJumpGameState(
     val isGameOver: Boolean = false,
     var gameState: GameStatus = GameStatus.IDLE
 
-    )
+)
 
-enum class GameStatus{
+enum class GameStatus {
     IDLE,
     STARTED,
-    PAUSED,
     GAMEOVER
 }
-enum class Direction{
+
+enum class Direction {
     LEFT,
     RIGHT
 }

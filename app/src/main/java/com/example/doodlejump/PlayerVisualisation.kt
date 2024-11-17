@@ -17,12 +17,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-fun PlayerCharacter(playerX: Float, playerY: Float,viewModel: GameViewModel = viewModel(), modifier: Modifier = Modifier) {
+fun PlayerCharacter(
+    playerX: Float,
+    playerY: Float,
+    viewModel: GameViewModel = viewModel(),
+    modifier: Modifier = Modifier
+) {
     val modelRight = painterResource(R.drawable.lik_right)
     val modelLeft = painterResource(R.drawable.lik_left)
-    val currentModel = if( viewModel.playerDirection.value == Direction.RIGHT){
+    val currentModel = if (viewModel.playerDirection.value == Direction.RIGHT) {
         modelRight
-    }else{
+    } else {
         modelLeft
     }
     Box(
@@ -38,14 +43,19 @@ fun PlayerCharacter(playerX: Float, playerY: Float,viewModel: GameViewModel = vi
         )
     }
 }
+
 @Composable
-fun PlayerDisplay(playerX: MutableState<Float>, playerY: MutableState<Float>, modifier:Modifier = Modifier){
+fun PlayerDisplay(
+    playerX: MutableState<Float>,
+    playerY: MutableState<Float>,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        PlayerCharacter(playerX = playerX.value, playerY = playerY.value, modifier = Modifier )
-        Box(
+        PlayerCharacter(playerX = playerX.value, playerY = playerY.value, modifier = Modifier)
+        /*Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
@@ -58,6 +68,6 @@ fun PlayerDisplay(playerX: MutableState<Float>, playerY: MutableState<Float>, mo
                 .padding(16.dp)
         ) {
             MoveLeft(playerX.value)
-        }
+        }*/
     }
 }

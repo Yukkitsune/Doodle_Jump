@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.abs
 
-@Composable
+/*@Composable
 fun testIndications(
     playerX: Float,
     playerY: MutableState<Float>,
@@ -33,13 +33,13 @@ fun testIndications(
                 }\n" +
                 "playerYScreenHeight = ${abs(playerY.value - screenHeight)}\n" +
                 "platforms = $platforms\n"
-        /*"platform[0] = ${platforms[0].y + screenHeight}\n" +
+        *//*"platform[0] = ${platforms[0].y + screenHeight}\n" +
         "platform[1] = ${platforms[1].y + screenHeight}\n" +
         "platform[2] = ${platforms[2].y + screenHeight}\n" +
-        "platform[3] = ${platforms[3].y + screenHeight}\n"*/,
+        "platform[3] = ${platforms[3].y + screenHeight}\n"*//*,
         modifier = Modifier.padding(top = 40.dp)
     )
-}
+}*/
 @Composable
 fun MoveRight(playerX: Float, viewModel: GameViewModel = viewModel()) {
     Button(

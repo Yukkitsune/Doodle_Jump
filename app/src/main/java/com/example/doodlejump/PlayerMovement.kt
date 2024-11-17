@@ -1,6 +1,6 @@
 package com.example.doodlejump
 
-import android.app.GameState
+import android.media.MediaPlayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import kotlinx.coroutines.delay
-import kotlin.random.Random
 
 
 @Composable
@@ -21,18 +20,15 @@ fun UpdatePlayerPosition(
     platforms: MutableList<Platform>,
     screenWidth: Float,
     screenHeight: Float,
-    onPlatformShift: (Float)->Unit,
-    currentGame:MutableState<DoodleJumpGameState>,
+    onPlatformShift: (Float) -> Unit,
+    currentGame: MutableState<DoodleJumpGameState>,
+    mediaPlayer: Map<String, MediaPlayer>,
     modifier: Modifier
 ) {
     LaunchedEffect(Unit) {
 
         while (true) {
             delay(16L) // Частота обновления 60 FPS
-            if (currentGame.value.gameState != GameStatus.STARTED){
-                delay(100L)
-                continue
-            }
             // Обновление координат по X и Y с учетом текущей скорости
             playerX.value += velocityX.value
 
@@ -46,22 +42,31 @@ fun UpdatePlayerPosition(
                 }
                 onPlatformShift(platformShift)
                 playerY.value += GRAVITY
-            }else{
+            } else {
                 playerY.value += velocityY.value
             }
-            if (checkPlatformCollision(
-                    playerX = playerX.value,
-                    playerY = playerY.value,
-                    platforms = platforms,
-                    velocityY = velocityY.value,
-                    screenHeight = screenHeight
-                )
-            ) {
-                velocityY.value = JUMP_FORCE
+            val (collisionCheck, jumpForce) = checkPlatformCollision(
+                playerX = playerX.value,
+                playerY = playerY.value,
+                platforms = platforms,
+                velocityY = velocityY.value,
+                screenHeight = screenHeight,
+                mediaPlayer = mediaPlayer
+            )
+            if (collisionCheck) {
+                velocityY.value = jumpForce
             }
             // Ограничение движения по оси Y (не позволяем персонажу упасть за пределы экрана)
-            if (playerY.value-20f > screenHeight) {
-                currentGame.value = currentGame.value.copy(gameState = GameStatus.GAMEOVER)
+            if (playerY.value - 20f > screenHeight) {
+                mediaPlayer["gameover"]?.apply {
+                    if (!isPlaying) {
+                        start()
+                        setOnCompletionListener {
+                            currentGame.value =
+                                currentGame.value.copy(gameState = GameStatus.GAMEOVER)
+                        }
+                    }
+                }
             }
 
             // Дополнительная проверка на левый/правый край экрана (для оси X)
@@ -81,13 +86,7 @@ fun playerSetupY(platforms: MutableList<Platform>): MutableState<Float> {
     val playerY = remember { mutableStateOf(screenHeight - (bottomPlatformY + 60f)) }
     return playerY
 }
-/*
-fun playerSetupX(platforms: MutableList<Platform>): MutableState<Float> {
-    val bottomPlatformX = initialPlatforms.minByOrNull { it.y }?.x ?: 0f
-    val playerX = remember { mutableStateOf(bottomPlatformX) }
-    return playerX
-}
-*/
+
 
 @Composable
 fun playerVelocityY(): MutableState<Float> {
@@ -106,10 +105,11 @@ fun checkPlatformCollision(
     playerY: Float,
     velocityY: Float,
     platforms: MutableList<Platform>,
-    screenHeight: Float
-): Boolean {
+    screenHeight: Float,
+    mediaPlayer: Map<String, MediaPlayer>
+): Pair<Boolean, Float> {
     if (velocityY > 0f) {
-        return platforms.any { platform ->
+        for (platform in platforms) {
             val platformTop = screenHeight - platform.y
             val platformBottom = screenHeight - (platform.y + platformHeight)
             val platformLeft = platform.x
@@ -117,8 +117,30 @@ fun checkPlatformCollision(
             val isWithinY =
                 playerY + playerHeight >= platformTop && playerY <= platformBottom
             val isWithinX = playerX + playerWidth / 2 >= platformLeft && playerX <= platformRight
-            isWithinX && isWithinY
+            if (isWithinX && isWithinY) {
+                when (platform.bonusType) {
+                    BonusType.SPRING -> {
+                        val springLeft = platform.x + (platformWidth / 3)
+                        val springRight = platform.x + (2 * platformWidth / 3)
+                        val isOnSpring =
+                            playerX + playerWidth in springLeft..springRight
+                        if (isOnSpring) {
+                            mediaPlayer["spring"]?.start()
+                            return true to SPRING_JUMP_FORCE
+                        } else {
+                            mediaPlayer["jump"]?.start()
+                            return true to JUMP_FORCE
+                        }
+                    }
+
+                    else -> {
+                        mediaPlayer["jump"]?.start()
+                        return true to JUMP_FORCE
+                    }
+                }
+            }
         }
     }
-    return false
+    return false to 0f
 }
+
