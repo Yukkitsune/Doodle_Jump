@@ -1,4 +1,4 @@
-package com.example.doodlejump
+package com.example.doodlejump.models
 
 import android.app.Application
 import android.content.Context
@@ -10,9 +10,17 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.example.doodlejump.data.Direction
+import com.example.doodlejump.data.DoodleJumpGameState
+import com.example.doodlejump.data.GameStatus
+import com.example.doodlejump.data.Platform
+import com.example.doodlejump.data.initialPlatforms
 
 class GameViewModel(application: Application) : AndroidViewModel(application), SensorEventListener {
-
+    private val _gameState = MutableLiveData(DoodleJumpGameState())
+    val gameState: LiveData<DoodleJumpGameState> get() = _gameState
     private val sensorManager: SensorManager =
         application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -36,8 +44,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     }
 
     private fun updatePlayerPosition(tilt: Float) {
-        // Здесь можно изменить скорость движения персонажа в зависимости от наклона
-        val sensitivity = -3f // Настраиваемая чувствительность
+        val sensitivity = -3f
         _playerXPosition.value += tilt * sensitivity
     }
 
@@ -50,8 +57,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        // Обрабатываем данные акселерометра
-        val xAxisValue = event?.values?.get(0) // Получаем наклон по оси X
+        val xAxisValue = event?.values?.get(0)
         if (xAxisValue != null) {
             updatePlayerPosition(xAxisValue)
             if (xAxisValue < -1) {
@@ -64,6 +70,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    fun setGameOver(score: Int) {
+        _gameState.value = _gameState.value?.copy(
+            gameState = GameStatus.GAMEOVER,
+            isGameOver = true,
+            score = score
+        )
+    }
+
     override fun onCleared() {
         super.onCleared()
         sensorManager.unregisterListener(this)

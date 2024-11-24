@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.DoodleJump" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.DoodleJump" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#f4ede9</item>
+        <item name="colorPrimaryVariant">#f4ede9</item>
+        <item name="colorSecondary">#f4ede9</item>
+    </style>
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">#f4ede9</item>
+        <item name="colorPrimaryVariant">#f4ede9</item>
+        <item name="colorSecondary">#f4ede9</item>
+    </style>
 </resources>
