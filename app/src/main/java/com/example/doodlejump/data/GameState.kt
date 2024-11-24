@@ -1,11 +1,10 @@
-package com.example.doodlejump
-
-import android.app.GameState
+package com.example.doodlejump.data
 
 data class DoodleJumpGameState(
     val direction: Direction = Direction.RIGHT,
     val isGameOver: Boolean = false,
-    var gameState: GameStatus = GameStatus.IDLE
+    var gameState: GameStatus = GameStatus.IDLE,
+    val score: Int = 0
 
 )
 

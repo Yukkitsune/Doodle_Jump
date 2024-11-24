@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="Doodle Jump">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-11-04T20:45:57.624927600Z">
+        <DropdownSelection timestamp="2024-11-23T22:20:09.641842900Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=15f4fa81" />

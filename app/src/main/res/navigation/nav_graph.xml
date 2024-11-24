@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/menuFragment">
+
+    <fragment
+        android:id="@+id/menuFragment"
+        android:name="com.example.doodlejump.ui.gameScreen.MenuFragment"
+        android:label="Menu">
+        <action
+            android:id="@+id/action_menuFragment_to_gameFragment"
+            app:destination="@id/gameFragment" />
+        <action
+            android:id="@+id/action_menuFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_menuFragment_to_highScoresFragment"
+            app:destination="@id/highScoresFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/gameFragment"
+        android:name="com.example.doodlejump.ui.gameScreen.GameFragment"
+        android:label="Game">
+        <action
+            android:id="@+id/action_gameFragment_to_gameOverFragment"
+            app:destination="@id/gameOverFragment">
+            <argument
+                android:name="score"
+                android:defaultValue="0"
+                app:argType="integer" />
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.doodlejump.ui.gameScreen.SettingsFragment"
+        android:label="Settings" />
+
+    <fragment
+        android:id="@+id/highScoresFragment"
+        android:name="com.example.doodlejump.ui.gameScreen.HighScoresFragment"
+        android:label="High Scores" />
+    <fragment
+        android:id="@+id/gameOverFragment"
+        android:name="com.example.doodlejump.ui.gameScreen.GameOverFragment"
+        android:label="Game Over">
+        <argument
+            android:name="score"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_gameOverFragment_to_menuFragment"
+            app:destination="@id/menuFragment" />
+    </fragment>
+
+
+</navigation>
